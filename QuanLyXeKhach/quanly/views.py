@@ -10,7 +10,8 @@ from .serializers import (UserSerializer,
                         ChuyenXeSerializer,
                         DatVeSerializer,
                         CreateCommentSerializer,
-                        CommentSerializer,)
+                        CommentSerializer,
+                        AuthChuyenXeSerializer)
 from rest_framework.parsers import MultiPartParser, FormParser
 
 
@@ -72,6 +73,11 @@ class ChuyenXeViewset(viewsets.ViewSet,
     serializer_class = ChuyenXeSerializer
     permission_classes = [permissions.AllowAny]
 
+    def get_serializer_class(self):
+        if self.request.user.is_authenticated:
+            return AuthChuyenXeSerializer
+        return ChuyenXeSerializer
+
     def get_queryset(self):
         query = self.queryset
         kw = self.request.query_params.get('kw')
@@ -106,17 +112,18 @@ class ChuyenXeViewset(viewsets.ViewSet,
 
     @action(methods=['post'], url_path='rating', detail=True)
     def rating(self, request, pk):
-        if 'rate' not in request.data:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
         chuyenxe = self.get_object()
         user = request.user
 
         r, _ = Rating.objects.get_or_create(chuyenxe=chuyenxe, user=user)
-        r.rate = int(request.data.get('rate'))
-        r.save()
+        r.rate = request.data.get('rate', 0)
+        try:
+            r.save()
+        except:
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(data=AuthChuyenXeSerializer(chuyenxe, context={'request': request}).data,
+                        status=status.HTTP_200_OK)
 
 
 class DatVeViewset  (viewsets.ViewSet,
@@ -127,7 +134,7 @@ class DatVeViewset  (viewsets.ViewSet,
 
     def get_permissions(self):
         if self.action == 'create':
-            return [permissions.AllowAny()]
+            return [permissions.IsAuthenticated()]
         else:
             if self.action in ['retrieve']:
                 return [permissions.IsAuthenticated()]

@@ -44,7 +44,6 @@ REST_FRAMEWORK = {
 #     'client_secret' : 'mfSXrmgwOQcNCky1qCkeahq6exiutvTkwrO6wWvhobYAXqmLC8KtRPdSF6kJUgiWrH1gjYVF008Okr9q4I60iKJUwJ1sGpQB72rrHJFbhG4n5iwQI5VjrHjp8mN4zLUm',
 # }
 
-MEDIA_URL = '/media/'
 MEDIA_ROOT = '%s/quanly/static/' % BASE_DIR
 
 
