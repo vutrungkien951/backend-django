@@ -9,7 +9,6 @@ route.register("tuyenxe", views.TuyenXeViewset, basename='tuyenxe')
 route.register("chuyenxe", views.ChuyenXeViewset, basename='chuyenxe')
 route.register("datve", views.DatVeViewset, basename='datve')
 route.register(prefix='comments', viewset=views.CommentViewSet, basename='comment')
-# route.register("thongke", views.ThongKeViewSet, basename='thongke')
 
 urlpatterns = [
     path('index/', views.index),

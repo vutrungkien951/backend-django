@@ -34,10 +34,11 @@ class UserSerializer(serializers.ModelSerializer):
     #     if obj.hinh_anh and not obj.hinh_anh.name.startswith('/static'):
     #         path = '/static/%s' % obj.hinh_anh.name
     #         return request.build_absolute_uri(path)
+    hinh_anh = serializers.ImageField(required=False)
 
     class Meta:
         model = User
-        fields = ['username', 'password', 'first_name', 'last_name', 'email', 'hinh_anh', 'vai_tro']
+        fields = ['username', 'password', 'email', 'hinh_anh']
         extra_kwargs = {
             'password': {
                 'write_only': True
@@ -51,10 +52,19 @@ class TuyenXeSerializer(serializers.ModelSerializer):
         fields = ['id', 'ten_tuyen', 'diem_di', 'diem_den']
 
 
+class TaiXeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username']
+
+
 class ChuyenXeSerializer(serializers.ModelSerializer):
+    tuyen_xe = TuyenXeSerializer()
+    so_ve_da_dat = serializers.IntegerField(source='SoLuongVeDaDat')
+    tai_xe = TaiXeSerializer()
     class Meta:
         model = ChuyenXe
-        fields = ['id', 'ten_chuyenxe', 'tai_xe', 'khoi_hanh', 'tuyen_xe', 'sl_ghe', 'gia_ve']
+        fields = ['id', 'ten_chuyenxe', 'tai_xe', 'khoi_hanh', 'tuyen_xe', 'sl_ghe', 'gia_ve', 'so_ve_da_dat']
 
 
 class TaiXeSerializer(serializers.ModelSerializer):
@@ -87,3 +97,4 @@ class ThongKeSerializer(ModelSerializer):
     class Meta:
         model = DatVe
         fields = ['id', 'nguoi_dat', 'chuyen_xe', 'so_luong_ve', 'tuyenxe', 'created_date']
+

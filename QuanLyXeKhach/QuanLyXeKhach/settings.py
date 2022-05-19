@@ -25,9 +25,9 @@ INSTALLED_APPS = [
     'drf_yasg',
     'quanly',
     'rest_framework',
+    'rest_framework_json_api',
     'oauth2_provider',
     'corsheaders',
-
 ]
 
 
@@ -44,15 +44,26 @@ REST_FRAMEWORK = {
 #     'client_secret' : 'mfSXrmgwOQcNCky1qCkeahq6exiutvTkwrO6wWvhobYAXqmLC8KtRPdSF6kJUgiWrH1gjYVF008Okr9q4I60iKJUwJ1sGpQB72rrHJFbhG4n5iwQI5VjrHjp8mN4zLUm',
 # }
 
+MEDIA_URL = '/media/'
 MEDIA_ROOT = '%s/quanly/static/' % BASE_DIR
-CORS_ALLOW_ALL_ORIGINS = True
+
 
 STATIC_URL = '/static/'
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+
+OAUTH2_PROVIDER = {
+    'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore',
+}
+
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -60,8 +71,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'oauth2_provider.middleware.OAuth2TokenMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'QuanLyXeKhach.urls'
@@ -101,7 +112,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'quanlyxekhach',
         'USER': 'root',
-        'PASSWORD': '123456789',
+        'PASSWORD': '12345678',
         'HOST': ''
     }
 }

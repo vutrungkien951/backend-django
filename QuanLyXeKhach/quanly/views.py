@@ -10,7 +10,8 @@ from .serializers import (UserSerializer,
                         ChuyenXeSerializer,
                         DatVeSerializer,
                         CreateCommentSerializer,
-                        CommentSerializer)
+                        CommentSerializer,)
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
 # Create your views here.
@@ -18,44 +19,21 @@ def index(request):
     return HttpResponse("Hello word")
 
 
-class UserViewSet(viewsets.ViewSet,
-                  generics.ListAPIView,
-                  generics.CreateAPIView,
-                  generics.UpdateAPIView,
-                  generics.DestroyAPIView,
-                  generics.RetrieveAPIView
-                  ):
+class UserViewSet(viewsets.ViewSet ,generics.CreateAPIView):
     queryset = User.objects.filter(is_active=True)
     serializer_class = UserSerializer
-
-    @action(methods=['get'], detail=False, url_path='current-user')
-    def get_current_user(self, request):
-        return Response(self.serializer_class(request.user).data, status=status.HTTP_200_OK)
+    parser_classes = (MultiPartParser, FormParser)
 
     def get_permissions(self):
-        if self.action == 'create' or self.action == 'list':
-            permission_classes = [permissions.AllowAny]
-            return [permission() for permission in permission_classes]
-        if self.action == 'current-user':
+        if self.action == 'current_user':
             return [permissions.IsAuthenticated()]
-        if self.action in ['update', 'destroy', 'retrieve']:
-            return [RolePermisson()]
 
-        return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
 
-    def get_queryset(self):
-        query = self.queryset
-
-        vt = self.request.query_params.get('vt')
-        if vt:
-            if int(vt) == 2 or int(vt) == 3:
-                query = query.filter(vai_tro_id=vt)
-                kw = self.request.query_params.get('kw')
-                if kw:
-                    query = query.filter(username__icontains=kw)
-            else:
-                query = User.objects.none()
-        return query
+    @action(methods=['get'], url_path="current-user", detail=False)
+    def current_user(self, request):
+        return Response(self.serializer_class(request.user, context={'request': request}).data,
+                        status=status.HTTP_200_OK)
 
 
 # admin only
@@ -89,12 +67,10 @@ class TuyenXeViewset(viewsets.ViewSet,
 # admin only
 class ChuyenXeViewset(viewsets.ViewSet,
                      generics.ListAPIView,
-                     generics.CreateAPIView,
-                     generics.UpdateAPIView,
-                     generics.DestroyAPIView,
                      generics.RetrieveAPIView):
     queryset = ChuyenXe.objects.filter(active=True)
     serializer_class = ChuyenXeSerializer
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         query = self.queryset
@@ -109,14 +85,6 @@ class ChuyenXeViewset(viewsets.ViewSet,
         #     tuyenxe = TuyenXe.objects.filter(active=True)
         #     query = query.filter(tuyen_xe__icontains=ddiem)
         return query
-
-    def get_permissions(self):
-        if self.action == 'list':
-            return [permissions.AllowAny]
-        else:
-            if self.action in ['create', 'update', 'destroy', 'retrieve']:
-                return [permissions.IsAuthenticated()]
-        return [permissions.IsAuthenticated()]
 
     @action(methods=['get'], url_path='comments', detail=True)
     def get_comments(self, request, pk):
@@ -165,6 +133,7 @@ class DatVeViewset  (viewsets.ViewSet,
                 return [permissions.IsAuthenticated()]
         return [permissions.IsAuthenticated()]
 
+
 # class ThongKeViewSet (viewsets.ViewSet, generics.ListAPIView):
 #     queryset = DatVe.objects.filter(active= True)
 #     serializer_class = DatVeSerializer
@@ -189,3 +158,4 @@ class CommentViewSet(viewsets.ViewSet, generics.CreateAPIView,
             return [CommentOwnerPermisson()]
 
         return [permissions.IsAuthenticated()]
+

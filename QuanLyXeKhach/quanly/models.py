@@ -21,8 +21,8 @@ class VaiTro(models.Model):
 
 class User(AbstractUser):
     hinh_anh = models.ImageField(null=True, blank=True, upload_to='user/%Y/%m')
-    so_dt = models.CharField(max_length=12, null=False, default=1)
-    vai_tro = models.ForeignKey(VaiTro, on_delete=models.CASCADE, default=4)
+    so_dt = models.CharField(max_length=12, null=True, default=1)
+    vai_tro = models.ForeignKey(VaiTro, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.username
@@ -38,6 +38,14 @@ class TuyenXe(ModelBase):
 
 
 class ChuyenXe(ModelBase):
+
+    def SoLuongVeDaDat(self):
+        list = self.ds_dat_ve.all()
+        sum = 0
+        for item in list:
+            sum += item.so_luong_ve
+        return sum
+
     ten_chuyenxe = models.CharField(max_length=255)
     tai_xe = models.ForeignKey(User, on_delete=models.CASCADE)
     khoi_hanh = models.DateTimeField()
@@ -50,9 +58,10 @@ class ChuyenXe(ModelBase):
         return self.ten_chuyenxe
 
 
+
 class DatVe(ModelBase):
     nguoi_dat = models.ForeignKey(User, on_delete=models.CASCADE)
-    chuyen_xe = models.ForeignKey(ChuyenXe, on_delete=models.CASCADE)
+    chuyen_xe = models.ForeignKey(ChuyenXe, on_delete=models.CASCADE, related_name='ds_dat_ve')
     so_luong_ve = models.SmallIntegerField()
 
     def __str__(self):
