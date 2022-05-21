@@ -11,7 +11,8 @@ from .serializers import (UserSerializer,
                         DatVeSerializer,
                         CreateCommentSerializer,
                         CommentSerializer,
-                        AuthChuyenXeSerializer)
+                        AuthChuyenXeSerializer,
+                        ChuyenXeIdSerializer)
 from rest_framework.parsers import MultiPartParser, FormParser
 
 
@@ -95,7 +96,7 @@ class ChuyenXeViewset(viewsets.ViewSet,
     @action(methods=['get'], url_path='comments', detail=True)
     def get_comments(self, request, pk):
         chuyenxe = self.get_object()
-        comments = chuyenxe.comments.select_related('user')
+        comments = chuyenxe.comments.select_related('user').filter(active=True)
 
         return Response(CommentSerializer(comments, many=True).data, status=status.HTTP_200_OK)
 
@@ -106,9 +107,13 @@ class ChuyenXeViewset(viewsets.ViewSet,
 
         l, _ = Like.objects.get_or_create(chuyenxe=chuyenxe, user=user)
         l.active = not l.active
-        l.save()
+        try:
+            l.save()
+        except:
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(data=AuthChuyenXeSerializer(chuyenxe, context={'request': request}).data,
+                        status=status.HTTP_200_OK)
 
     @action(methods=['post'], url_path='rating', detail=True)
     def rating(self, request, pk):

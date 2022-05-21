@@ -104,6 +104,11 @@ class CreateCommentSerializer(serializers.ModelSerializer):
         fields = ['id', 'noi_dung', 'chuyen_xe', 'user']
 
 
+class ChuyenXeIdSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChuyenXe
+        fields = ['id']
+
 class CommentSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
